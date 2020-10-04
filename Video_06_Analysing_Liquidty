@@ -1,0 +1,38 @@
+import requests
+import pandas as pd
+#api_key = 'asdfadsf'
+screener = requests.get(f'https://financialmodelingprep.com/api/v3/stock-screener?marketCapMoreThan=1000000000&sector=Technology&exchange=NASDAQ&limit=10&apikey={api_key}').json()
+
+print(screener)
+
+tickers = []
+for item in screener:
+  tickers.append(item['symbol'])
+
+#print(tickers)
+
+companies = {}
+for ticker in tickers:
+  BS = requests.get(f'https://financialmodelingprep.com/api/v3/balance-sheet-statement/{ticker}?limit=1&apikey={api_key}').json()
+  companies[ticker] = BS[0]
+
+ 
+BS_industry = pd.DataFrame.from_dict(companies)
+BS_industry = BS_industry.T
+
+print(BS_industry['totalCurrentAssets'])
+print(BS_industry['totalCurrentLiabilities'])
+
+BS_industry['current_Ratio'] = BS_industry['totalCurrentAssets'] / BS_industry['totalCurrentLiabilities']
+
+BS_industry['quick_Ratio'] = (BS_industry['cashAndCashEquivalents'] + BS_industry['shortTermInvestments'] +BS_industry['netReceivables']) / BS_industry['totalCurrentLiabilities']
+
+BS_industry['cash_Ratio'] = (BS_industry['cashAndCashEquivalents'] + BS_industry['shortTermInvestments']) / BS_industry['totalCurrentLiabilities']
+
+import matplotlib.pyplot as plt
+
+BS_industry[['current_Ratio','quick_Ratio','cash_Ratio']].plot(figsize=(30,5), marker = 'o')
+#to have all xticks
+plt.xticks(list(range(len(BS_industry.index))), BS_industry.index, fontsize = 10 )
+
+plt.show()
