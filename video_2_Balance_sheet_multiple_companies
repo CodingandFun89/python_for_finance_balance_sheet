@@ -1,0 +1,50 @@
+import requests
+import pandas as pd
+#api_key = 'asdfadsf'
+screener = requests.get(f'https://financialmodelingprep.com/api/v3/stock-screener?marketCapMoreThan=1000000000&sector=Technology&exchange=NASDAQ&limit=10&apikey={api_key}').json()
+
+print(screener)
+
+tickers = []
+for item in screener:
+  tickers.append(item['symbol'])
+
+print(tickers)
+
+companies = {}
+for ticker in tickers:
+  BS = requests.get(f'https://financialmodelingprep.com/api/v3/balance-sheet-statement/{ticker}?limit=1&apikey={api_key}').json()
+  companies[ticker] = BS[0]
+
+ 
+BS_industry = pd.DataFrame.from_dict(companies)
+BS_industry
+
+BS_our_Columns = ['date', 
+       'cashAndCashEquivalents', 'shortTermInvestments',
+       'cashAndShortTermInvestments', 'netReceivables', 'inventory',
+       'otherCurrentAssets', 'totalCurrentAssets', 'propertyPlantEquipmentNet',
+       'goodwill', 'intangibleAssets', 'goodwillAndIntangibleAssets',
+       'longTermInvestments', 'taxAssets', 'otherNonCurrentAssets',
+       'totalNonCurrentAssets', 'otherAssets', 'totalAssets',
+       'accountPayables', 'shortTermDebt', 'taxPayables', 'deferredRevenue',
+       'otherCurrentLiabilities', 'totalCurrentLiabilities', 'longTermDebt',
+       'deferredRevenueNonCurrent', 'deferredTaxLiabilitiesNonCurrent',
+       'otherNonCurrentLiabilities', 'totalNonCurrentLiabilities',
+       'otherLiabilities', 'totalLiabilities', 'commonStock',
+       'retainedEarnings', 'accumulatedOtherComprehensiveIncomeLoss',
+       'othertotalStockholdersEquity', 'totalStockholdersEquity',
+       'totalLiabilitiesAndStockholdersEquity', 'totalInvestments',
+       'totalDebt', 'netDebt']
+
+BS_industry = BS_industry.T
+BS_industry = BS_industry[BS_our_Columns]
+BS_industry = BS_industry.T
+print(BS_industry)
+
+BS_industry1 = BS_industry.iloc[1:]/1000000
+BS_industry1 = BS_industry1.T
+BS_industry1['cashAndCashEquivalents'].plot(legend=True, figsize=(15,5))
+
+
+print(BS_industry1.T)
