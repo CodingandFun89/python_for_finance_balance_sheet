@@ -1,0 +1,31 @@
+import requests
+import pandas as pd
+#api_key = 'asdfadsf'
+screener = requests.get(f'https://financialmodelingprep.com/api/v3/stock-screener?marketCapMoreThan=1000000000&sector=Technology&exchange=NASDAQ&limit=10&apikey={api_key}').json()
+
+print(screener)
+
+tickers = []
+for item in screener:
+  tickers.append(item['symbol'])
+
+#print(tickers)
+
+companies = {}
+for ticker in tickers:
+  BS = requests.get(f'https://financialmodelingprep.com/api/v3/balance-sheet-statement/{ticker}?limit=1&apikey={api_key}').json()
+  companies[ticker] = BS[0]
+
+ 
+BS_industry = pd.DataFrame.from_dict(companies)
+BS_industry = BS_industry.T
+BS_industry['debt_to_Assets'] = BS_industry['totalDebt'] /BS_industry['totalAssets']
+BS_industry['debt_to_Capital'] = BS_industry['totalDebt'] / (BS_industry['totalDebt'] + BS_industry['totalStockholdersEquity'])
+
+BS_industry['debt_to_Equity']  = BS_industry['totalDebt'] / (BS_industry['totalStockholdersEquity'])                                    
+BS_industry['financial_Leverage'] = BS_industry['totalAssets'] / BS_industry['totalStockholdersEquity']
+
+BS_industry = BS_industry[['debt_to_Assets','debt_to_Capital','debt_to_Equity','financial_Leverage']]
+
+BS_industry.loc['mean'] = BS_industry.astype('float').mean()
+print(BS_industry)
