@@ -1,0 +1,40 @@
+import requests
+import pandas as pd
+#https://financialmodelingprep.com/api/v3/balance-sheet-statement/AAPL?limit=1&apikey=demo
+
+company = 'AAPL'
+#api_key = 'your_api_key'
+BS = requests.get(f'https://financialmodelingprep.com/api/v3/balance-sheet-statement/{company}?limit=5&apikey={api_key}').json()
+
+BS = pd.DataFrame.from_dict(BS)
+
+print(BS.columns)
+
+BS_our_Columns = ['date', 
+       'cashAndCashEquivalents', 'shortTermInvestments',
+       'cashAndShortTermInvestments', 'netReceivables', 'inventory',
+       'otherCurrentAssets', 'totalCurrentAssets', 'propertyPlantEquipmentNet',
+       'goodwill', 'intangibleAssets', 'goodwillAndIntangibleAssets',
+       'longTermInvestments', 'taxAssets', 'otherNonCurrentAssets',
+       'totalNonCurrentAssets', 'otherAssets', 'totalAssets',
+       'accountPayables', 'shortTermDebt', 'taxPayables', 'deferredRevenue',
+       'otherCurrentLiabilities', 'totalCurrentLiabilities', 'longTermDebt',
+       'deferredRevenueNonCurrent', 'deferredTaxLiabilitiesNonCurrent',
+       'otherNonCurrentLiabilities', 'totalNonCurrentLiabilities',
+       'otherLiabilities', 'totalLiabilities', 'commonStock',
+       'retainedEarnings', 'accumulatedOtherComprehensiveIncomeLoss',
+       'othertotalStockholdersEquity', 'totalStockholdersEquity',
+       'totalLiabilitiesAndStockholdersEquity', 'totalInvestments',
+       'totalDebt', 'netDebt']
+
+BS = BS[BS_our_Columns]
+BS = BS.T
+
+BS.columns = BS.iloc[0]
+
+BS =BS.iloc[1:]
+total_Assets = BS.iloc[16]
+
+common_Size = BS / total_Assets
+print(common_Size)
+
