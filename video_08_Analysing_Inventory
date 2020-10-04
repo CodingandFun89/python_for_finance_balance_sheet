@@ -1,0 +1,43 @@
+#get list of companies
+screener = requests.get(f'https://financialmodelingprep.com/api/v3/stock-screener?marketCapMoreThan=1000000000&betaMoreThan=1&volumeMoreThan=10000&sector=Technology&exchange=NASDAQ&dividendMoreThan=0&limit=10&apikey={api_key}').json()
+
+tickers = []
+for item in screener:
+  tickers.append(item['symbol'])
+tickers
+
+companies = {}
+for ticker in tickers:
+  BS = requests.get(f'https://financialmodelingprep.com/api/v3/balance-sheet-statement/{ticker}?limit=2&apikey={api_key}').json()
+
+  IS = requests.get(f'https://financialmodelingprep.com/api/v3/income-statement/{ticker}?limit=1&apikey={api_key}').json()
+
+  companies[ticker] = {}
+  
+  
+  average_inventory = (BS[1]['inventory'] + BS[0]['inventory']) / 2
+
+  companies[ticker]['avg_Inventory'] =  average_inventory
+
+  COGS = IS[0]['costOfRevenue']
+  companies[ticker]['COGS'] = COGS
+  try:
+    companies[ticker]['inventory_Turnover'] = companies[ticker]['COGS'] / companies[ticker]['avg_Inventory']
+    companies[ticker]['DOH'] = 365 / companies[ticker]['inventory_Turnover'] 
+  
+  except:
+    companies[ticker]['inventory_Turnover'] = 0
+    companies[ticker]['DOH'] = 0
+
+
+
+print(companies)
+
+inventory_Analysis = pd.DataFrame.from_dict(companies)
+print(inventory_Analysis)
+
+inventory_Analysis['mean'] = inventory_Analysis.mean(axis=1)
+
+pd.options.display.float_format = "{:,.2f}".format 
+inventory_Analysis.iloc[2:]
+
