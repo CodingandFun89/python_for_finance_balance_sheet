@@ -1,0 +1,59 @@
+import requests
+import pandas as pd
+
+all_Receivables = {}
+
+stock = 'AAPL'
+#api_key = 'your api key'
+
+balance_Sheet = requests.get(f'https://financialmodelingprep.com/api/v3/balance-sheet-statement/{stock}?limit=10&apikey={api_key}').json()
+
+print(balance_Sheet)
+
+all_Receivables[stock] = {}
+for item in balance_Sheet:
+  receivables = item['netReceivables']
+  period = item['date']
+
+  all_Receivables[stock][period] = receivables
+
+print(all_Receivables)
+
+receivables_apple = pd.DataFrame.from_dict(all_Receivables)
+
+print(receivables_apple)
+
+import plotly.express as px
+
+fig = px.bar(receivables_apple, x=receivables_apple.index , y=receivables_apple[stock], title = 'Acc Receivables ' + stock)
+fig.show()
+
+companies = ['MSFT','AAPL','GOOG','IBM','CSCO','ORCL','AMZN']
+
+all_Receivables = {}
+
+for company in companies:
+  balanceSheet = requests.get(f'https://financialmodelingprep.com/api/v3/balance-sheet-statement/{company}?limit=1&apikey={api_key}').json()
+  all_Receivables[company] = {}
+  receivables = balanceSheet[0]['netReceivables']
+  all_Receivables[company]['receivables'] = receivables
+
+  IS = requests.get(f'https://financialmodelingprep.com/api/v3/income-statement/{company}?limit=1&apikey={api_key}').json()
+  revenues = IS[0]['revenue']
+  all_Receivables[company]['revenue'] = revenues
+  all_Receivables[company]['receivable_Turnover'] = revenues / receivables
+  all_Receivables[company]['DSO'] = 365 / all_Receivables[company]['receivable_Turnover']
+
+
+
+
+
+receivable_Companies = pd.DataFrame.from_dict(all_Receivables)
+receivable_Companies
+
+receivable_Companies_DSO = receivable_Companies[receivable_Companies.index == 'DSO']
+
+receivable_Companies_DSO = receivable_Companies_DSO.T
+
+fig = px.bar(receivable_Companies_DSO, x=receivable_Companies_DSO.index, y=receivable_Companies_DSO['DSO'])
+fig.show()
