@@ -9,7 +9,7 @@ BS = requests.get(f'https://financialmodelingprep.com/api/v3/balance-sheet-state
 
 BS = pd.DataFrame.from_dict(BS)
 
-BS.columns
+print(BS.columns)
 
 BS_our_Columns = ['date', 
        'cashAndCashEquivalents', 'shortTermInvestments',
@@ -34,4 +34,4 @@ BS = BS.T
 BS.columns = BS.iloc[0]
 
 BS =BS.iloc[1:]
-BS
+print(BS)
