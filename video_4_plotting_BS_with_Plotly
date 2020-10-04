@@ -1,0 +1,33 @@
+import requests
+
+companies = ['ABBV', 'AGN','JNJ','LLY','MRK','MYL','PRGO','ZTS']
+
+assets = []
+liabilities = []
+equity = []
+
+#api_key ='your api key'
+
+for company in companies:
+  balance_Sheet = requests.get(f'https://financialmodelingprep.com/api/v3/balance-sheet-statement/{company}?period=quarter&limit=1&apikey={api_key}').json()
+  asset_i = balance_Sheet[0]['totalAssets']
+  assets.append(asset_i)
+
+  liability_i = balance_Sheet[0]['totalLiabilities']
+  liabilities.append(liability_i)
+
+  equity_i = balance_Sheet[0]['totalStockholdersEquity']
+  equity.append(equity_i)
+
+import plotly.graph_objects as go
+
+fig = go.Figure(data=[
+                    go.Bar(name='Assets', x=companies, y=assets),
+                    go.Bar(name='Liabilities', x=companies, y=liabilities),
+                    go.Bar(name='Equity', x=companies, y=equity)
+                     
+])
+
+fig.update_layout(barmode = 'stack', title='Balance Sheet Latest Quarter')
+
+fig.show()
